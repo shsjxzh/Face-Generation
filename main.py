@@ -18,20 +18,17 @@ import logging
 EPOCH = 200                    # the training times
 BATCH_SIZE = 64                # not use all data to train
 SHOW_STEP = 101                # show the result after how many steps
-# CHANGE_EPOCH = 10              # change learning rate
-
+START_STEP = 0
 CHANGE_STEP = 10
 
 SAVE_EPOCH = 10
 USE_GPU = True                 # CHANGE THIS ON GPU!!
 
-DeviceID = [0,2,5]
+DeviceID = [6,1,5]
 G_LR = 0.0002
 D_LR = 0.0001
 IC_LR = 0.0001
 A_LR = 0.0002
-
-START_STEP = 500
 
 # other parameters
 # be care about the image size !!
@@ -283,8 +280,7 @@ def train(IC, D, G, A, IC_solver, D_solver, G_solver, A_solver, device, train_lo
                 adjust_learning_rate(G_LR, G_solver, iter_count)
                 adjust_learning_rate(D_LR, D_solver, iter_count)
             
-            
-            
+                 
             iter_count += 1
 
 def main():
@@ -302,11 +298,13 @@ def main():
                                      std=[0.229, 0.224, 0.225])
                     ])
     face_data = CelebADataset(csv_file='celeba_label/identity_CelebA.txt', 
+                              # csv_file= 'identity_CelebA.txt', 
                               root_dir='img_align_celeba',
+                              # root_dir = 'Test',
                               transform=mytransform)
 
     # CHANGE THIS ON GPU!!
-    train_loader = Data.DataLoader(dataset=face_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=3)   
+    train_loader = Data.DataLoader(dataset=face_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=3, drop_last=True)   
 
     if USE_GPU:
         device = torch.device("cuda:" + str(DeviceID[0]))
@@ -315,7 +313,7 @@ def main():
 
     from Classifier import Classifier
     IC = Classifier(num_classes=num_people, vector_length=VectorLength, PRETRAINED=True)
-    # load_dict(IC, torch.load('IC.pkl'))
+    load_dict(IC, torch.load('IC.pkl'))
     if USE_GPU:
         IC = nn.DataParallel(IC, device_ids=DeviceID).to(device)
 
