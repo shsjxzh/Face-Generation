@@ -24,7 +24,7 @@ CHANGE_STEP = 10
 SAVE_EPOCH = 10
 USE_GPU = True                 # CHANGE THIS ON GPU!!
 
-DeviceID = [6,1,5]
+DeviceID = [0,3,4]
 G_LR = 0.0002
 D_LR = 0.0001
 IC_LR = 0.0001
@@ -193,7 +193,7 @@ def train(IC, D, G, A, IC_solver, D_solver, G_solver, A_solver, device, train_lo
             # a simplified version of LKL diver
             LKL_loss = 0.5 * (my_mean.pow(2) + log_var.exp() - log_var - 1).sum()
             LGR_loss = 0.5 * ((fake_images - identity_images)**2).sum()
-            LA_loss = LKL_loss + r * LGR_loss * 10
+            LA_loss = LKL_loss + r * LGR_loss
             LA_loss.backward()
             A_solver.step()
 
@@ -304,6 +304,7 @@ def main():
                               transform=mytransform)
 
     # CHANGE THIS ON GPU!!
+    # Be careful that we drop last to make the feature vector the same length
     train_loader = Data.DataLoader(dataset=face_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=3, drop_last=True)   
 
     if USE_GPU:
